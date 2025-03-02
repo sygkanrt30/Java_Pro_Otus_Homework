@@ -1,15 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("com.gradleup.shadow") version "8.3.6"
-    id("java-library")
+    id ("com.github.johnrengelman.shadow")
 }
 
-repositories {
-    mavenCentral()
-}
 dependencies {
-    implementation ("com.google.guava:guava:33.4.0-jre")
+    implementation ("com.google.guava:guava")
 }
 
 tasks {
@@ -21,8 +17,8 @@ tasks {
             attributes(mapOf("Main-Class" to "ru.otus.java.HelloOtus"))
         }
     }
+
     build {
         dependsOn(shadowJar)
     }
-
 }
