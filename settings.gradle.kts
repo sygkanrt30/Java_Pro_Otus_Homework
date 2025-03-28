@@ -23,3 +23,5 @@ pluginManagement {
     }
 }
 include("hw02-generic")
+include("hw03-annotation")
+include("hw04-GarbageCollector")
