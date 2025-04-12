@@ -11,7 +11,7 @@ plugins {
 }
 
 allprojects {
-    group = "ru.otus"
+    group = "ru.otus.homework"
 
     repositories {
         mavenLocal()
