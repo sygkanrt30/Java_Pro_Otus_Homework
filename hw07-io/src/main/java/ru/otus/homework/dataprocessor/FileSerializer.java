@@ -1,44 +1,20 @@
 package ru.otus.homework.dataprocessor;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 
-@Slf4j
+@AllArgsConstructor
 public class FileSerializer implements Serializer {
     private final String fileName;
 
-    public FileSerializer(String fileName) {
-        this.fileName = fileName;
-    }
-
     @Override
+    @SneakyThrows
     public void serialize(Map<String, Double> data) {
-        String content = makeContentFromMap(data);
-        writeToFile(content);
-    }
-
-    private String makeContentFromMap(Map<String, Double> data) {
-        StringBuilder content = new StringBuilder("{");
-        for (Map.Entry<String, Double> entry : data.entrySet()) {
-            content.append("\"")
-                    .append(entry.getKey())
-                    .append("\":")
-                    .append(entry.getValue())
-                    .append(",");
-        }
-        content.deleteCharAt(content.length() - 1);
-        content.append("}");
-        return content.toString();
-    }
-
-    private void writeToFile(String content) {
-        try (var writer = new FileWriter(fileName)) {
-            writer.write(content);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new FileProcessException(e);
-        }
+        var mapper = new ObjectMapper();
+        var file = new File(fileName);
+        mapper.writeValue(file, data);
     }
 }
