@@ -32,6 +32,10 @@ public class Message {
     }
 
     public Message clone() {
+        ObjectForMessage objectForMessage = null;
+        if (field13 != null) {
+            objectForMessage = field13.copy();
+        }
         return new Message(
                 id,
                 field1,
@@ -46,7 +50,7 @@ public class Message {
                 field10,
                 field11,
                 field12,
-                field13.copy());
+                objectForMessage);
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)

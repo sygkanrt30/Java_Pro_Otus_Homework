@@ -6,7 +6,7 @@ import ru.otus.homework.processor.Processor;
 
 @AllArgsConstructor
 public class ThrowEvenSecProcessor implements Processor {
-    TimeProvider timeProvider;
+    private final TimeProvider timeProvider;
 
     @Override
     public Message process(Message message) {

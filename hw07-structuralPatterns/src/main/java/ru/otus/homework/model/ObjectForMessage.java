@@ -16,6 +16,9 @@ public class ObjectForMessage {
     }
 
     public ObjectForMessage copy() {
-        return new ObjectForMessage(List.copyOf(data));
+        if (data != null) {
+            return new ObjectForMessage(List.copyOf(data));
+        }
+        return new ObjectForMessage(null);
     }
 }

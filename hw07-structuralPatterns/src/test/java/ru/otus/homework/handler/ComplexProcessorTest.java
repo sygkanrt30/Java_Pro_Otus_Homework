@@ -95,7 +95,7 @@ class ComplexProcessorTest {
         // given
         var message = new Message.Builder(1L).field1("field1").build();
 
-        Processor processor1 = new ThrowEvenSecProcessor(new TestTimeProvider());
+        Processor processor1 = new ThrowEvenSecProcessor(new TestTimeProvider(LocalTime.of(2, 23, 0)));
         var processors = List.of(processor1);
 
         var complexProcessor = new ComplexProcessor(processors, (ex) -> {
@@ -105,16 +105,32 @@ class ComplexProcessorTest {
         assertThatExceptionOfType(TestException.class).isThrownBy(() -> complexProcessor.handle(message));
     }
 
+    @Test
+    @DisplayName("Тестируем не выброс исключения на нечетной секунде")
+    void throwingExceptionProcessorTest2() {
+        // given
+        var message = new Message.Builder(1L).field1("field1").build();
+
+        Processor processor1 = new ThrowEvenSecProcessor(new TestTimeProvider(LocalTime.of(2, 23, 1)));
+        var processors = List.of(processor1);
+
+        var complexProcessor = new ComplexProcessor(processors, (ex) -> {
+            throw new TestException(ex.getMessage());
+        });
+
+        assertThat(complexProcessor.handle(message)).isEqualTo(message);
+    }
+
     private static class TestException extends RuntimeException {
         public TestException(String message) {
             super(message);
         }
     }
 
-    private static class TestTimeProvider implements TimeProvider {
+    private record TestTimeProvider(LocalTime localTime) implements TimeProvider {
         @Override
         public LocalTime getTime() {
-            return LocalTime.of(5, 23, 0);
+            return localTime;
         }
     }
 }
