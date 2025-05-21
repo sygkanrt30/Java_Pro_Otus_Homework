@@ -21,9 +21,6 @@ public class HistoryListener implements Listener, HistoryReader {
 
     @Override
     public Optional<Message> findMessageById(long id) {
-        return history.entrySet().stream()
-                .filter(entry -> entry.getKey() == id)
-                .findFirst()
-                .map(Map.Entry::getValue);
+        return Optional.of(history.get(id));
     }
 }
