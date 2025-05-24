@@ -5,13 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
-    private final EntityClassMetaData<?> entityClassMetaData;
     private final String tableName;
     private final String idFieldName;
     private final List<String> withoutIdFieldNames;
 
     public EntitySQLMetaDataImpl(EntityClassMetaData<?> entityClassMetaData) {
-        this.entityClassMetaData = entityClassMetaData;
         this.tableName = entityClassMetaData.getName().toLowerCase();
         this.idFieldName = entityClassMetaData.getIdField().getName();
         this.withoutIdFieldNames = entityClassMetaData.getFieldsWithoutId().stream()
@@ -21,7 +19,7 @@ public class EntitySQLMetaDataImpl implements EntitySQLMetaData {
 
     @Override
     public String getSelectAllSql() {
-        return "SELECT * FROM %s".formatted(entityClassMetaData.getName().toLowerCase());
+        return "SELECT * FROM %s".formatted(tableName);
     }
 
     @Override

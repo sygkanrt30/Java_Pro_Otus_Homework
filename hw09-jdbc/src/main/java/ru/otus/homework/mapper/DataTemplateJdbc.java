@@ -37,19 +37,19 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
     @SuppressWarnings("All")
     private T convertToOptional(ResultSet rs) {
         List<Field> fields = entityClassMetaData.getAllFields();
-        List<Object> values = new ArrayList<>();
         if (!rs.next()) return null;
         int columnCount = rs.getMetaData().getColumnCount();
-        getValuesForEntity(rs, columnCount, values);
+        List<Object> values = getValuesForEntity(rs, columnCount);
         T client = getClient(fields, values);
         return client;
     }
 
-    private void getValuesForEntity(ResultSet rs, int columnCount, List<Object> values) throws SQLException {
-        values.clear();
+    private List<Object> getValuesForEntity(ResultSet rs, int columnCount) throws SQLException {
+        List<Object> values = new ArrayList<>();
         for (int k = 1; k <= columnCount; k++) {
             values.add(rs.getObject(k));
         }
+        return values;
     }
 
     @SuppressWarnings("All")
@@ -75,10 +75,9 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
     private List<T> convertToList(ResultSet rs) {
         List<T> result = new ArrayList<>();
         List<Field> fields = entityClassMetaData.getAllFields();
-        List<Object> values = new ArrayList<>();
         int columnCount = rs.getMetaData().getColumnCount();
         while (rs.next()) {
-            getValuesForEntity(rs, columnCount, values);
+            List<Object> values = getValuesForEntity(rs, columnCount);
             T client = getClient(fields, values);
             result.add(client);
         }
