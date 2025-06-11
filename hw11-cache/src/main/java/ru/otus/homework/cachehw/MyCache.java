@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class MyCache<K, V> implements HwCache<K, V> {
     Map<K, V> cacheStorage;
     List<HwListener<K, V>> listeners;
@@ -20,21 +22,29 @@ public class MyCache<K, V> implements HwCache<K, V> {
     @Override
     public void put(K key, V value) {
         cacheStorage.put(key, value);
-        listeners.forEach(listener -> listener.notify(key, value, "put"));
+        notifyListeners(key, value, "put");
     }
 
     @Override
     public void remove(K key) {
         V value = cacheStorage.remove(key);
-        listeners.forEach(listener -> listener.notify(key, value, "remove"));
+        notifyListeners(key, value, "remove");
     }
 
     @Override
     public V get(K key) {
         if (!cacheStorage.containsKey(key)) return null;
         V result = cacheStorage.get(key);
-        listeners.forEach(listener -> listener.notify(key, result, "get"));
+        notifyListeners(key, result, "get");
         return result;
+    }
+
+    private void notifyListeners(K key, V result, String action) {
+        try {
+            listeners.forEach(listener -> listener.notify(key, result, action));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     @Override

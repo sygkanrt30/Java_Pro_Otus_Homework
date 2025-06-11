@@ -3,12 +3,14 @@ package ru.otus.homework;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
+import ru.otus.homework.cachehw.MyCache;
 import ru.otus.homework.core.DbExecutorImpl;
 import ru.otus.homework.datasource.DriverManagerDataSource;
 import ru.otus.homework.mapper.*;
 import ru.otus.homework.models.Client;
 import ru.otus.homework.models.Manager;
-import ru.otus.homework.service.GeneralCacheDbService;
+import ru.otus.homework.service.DbServiceClientImpl;
+import ru.otus.homework.service.DbServiceManagerImpl;
 import ru.otus.homework.sessionmanager.TransactionRunnerJdbc;
 
 @SuppressWarnings({"java:S125", "java:S1481"})
@@ -34,12 +36,12 @@ public class HomeWork {
                 entityClassMetaDataClient); // реализация DataTemplate, универсальная
 
         // Код дальше должен остаться
-        var dbServiceClient = new GeneralCacheDbService<>(transactionRunner, dataTemplateClient);
-        dbServiceClient.saveEntity(new Client("dbServiceFirst"));
+        var dbServiceClient = new DbServiceClientImpl(transactionRunner, dataTemplateClient, new MyCache<>());
+        dbServiceClient.saveClient(new Client("dbServiceFirst"));
 
-        var clientSecond = dbServiceClient.saveEntity(new Client("dbServiceSecond"));
+        var clientSecond = dbServiceClient.saveClient(new Client("dbServiceSecond"));
         var clientSecondSelected = dbServiceClient
-                .getEntity(clientSecond.getId())
+                .getClient(clientSecond.getId())
                 .orElseThrow(() -> new RuntimeException("Client not found, id:" + clientSecond.getId()));
         log.info("clientSecondSelected:{}", clientSecondSelected);
 
@@ -50,12 +52,12 @@ public class HomeWork {
         var dataTemplateManager =
                 new DataTemplateJdbc<Manager>(dbExecutor, entitySQLMetaDataManager, entityClassMetaDataManager);
 
-        var dbServiceManager = new GeneralCacheDbService<>(transactionRunner, dataTemplateManager);
-        dbServiceManager.saveEntity(new Manager("ManagerFirst"));
+        var dbServiceManager = new DbServiceManagerImpl(transactionRunner, dataTemplateManager, new MyCache<>());
+        dbServiceManager.saveManager(new Manager("ManagerFirst"));
 
-        var managerSecond = dbServiceManager.saveEntity(new Manager("ManagerSecond"));
+        var managerSecond = dbServiceManager.saveManager(new Manager("ManagerSecond"));
         var managerSecondSelected = dbServiceManager
-                .getEntity(managerSecond.getNo())
+                .getManager(managerSecond.getNo())
                 .orElseThrow(() -> new RuntimeException("Manager not found, id:" + managerSecond.getNo()));
         log.info("managerSecondSelected:{}", managerSecondSelected);
     }
