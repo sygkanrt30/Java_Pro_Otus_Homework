@@ -13,19 +13,19 @@ import ru.otus.homework.sessionmanager.TransactionRunner;
 public class DbServiceManagerImpl implements DbServiceManager {
     private final DataTemplate<Manager> managerDataTemplate;
     private final TransactionRunner transactionRunner;
-    HwCache<Long, Manager> cache;
+    private final HwCache<String, Manager> cache;
 
     public DbServiceManagerImpl(
             TransactionRunner transactionRunner,
             DataTemplate<Manager> managerDataTemplate,
-            HwCache<Long, Manager> cache) {
+            HwCache<String, Manager> cache) {
         this.transactionRunner = transactionRunner;
         this.managerDataTemplate = managerDataTemplate;
         this.cache = cache;
         @SuppressWarnings("All")
-        var listener = new HwListener<Long, Manager>() {
+        var listener = new HwListener<String, Manager>() {
             @Override
-            public void notify(Long key, Manager value, String action) {
+            public void notify(String key, Manager value, String action) {
                 log.info("key:{}, value:{}, action: {}", key, value, action);
             }
         };
@@ -39,13 +39,13 @@ public class DbServiceManagerImpl implements DbServiceManager {
                 var managerNo = managerDataTemplate.insert(connection, manager);
                 var createdManager = new Manager(managerNo, manager.getLabel(), manager.getParam1());
                 log.info("created manager: {}", createdManager);
-                cache.put(managerNo, createdManager);
+                cache.put(String.valueOf(managerNo), createdManager);
                 return createdManager;
             }
             managerDataTemplate.update(connection, manager);
             log.info("updated manager: {}", manager);
-            cache.remove(manager.getNo());
-            cache.put(manager.getNo(), manager);
+            cache.remove(String.valueOf(manager.getNo()));
+            cache.put(String.valueOf(manager.getNo()), manager);
             return manager;
         });
     }
@@ -53,10 +53,12 @@ public class DbServiceManagerImpl implements DbServiceManager {
     @Override
     public Optional<Manager> getManager(long no) {
         return transactionRunner.doInTransaction(connection -> {
-            Manager manager = cache.get(no);
+            Manager manager = cache.get(String.valueOf(no));
             if (manager == null) {
                 var managerOptional = managerDataTemplate.findById(connection, no);
-                log.info("manager: {}", managerOptional);
+                var managerFound = managerOptional.orElseThrow(() -> new RuntimeException("no manager found"));
+                log.info("manager: {}", managerFound);
+                cache.put(String.valueOf(managerFound.getNo()), managerFound);
                 return managerOptional;
             }
             return Optional.of(manager);
@@ -68,6 +70,7 @@ public class DbServiceManagerImpl implements DbServiceManager {
         return transactionRunner.doInTransaction(connection -> {
             var managerList = managerDataTemplate.findAll(connection);
             log.info("managerList:{}", managerList);
+            managerList.forEach(manager -> cache.put(String.valueOf(manager.getNo()), manager));
             return managerList;
         });
     }

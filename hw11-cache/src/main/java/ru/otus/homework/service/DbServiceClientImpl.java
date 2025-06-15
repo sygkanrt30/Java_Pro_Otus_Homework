@@ -13,17 +13,17 @@ import ru.otus.homework.sessionmanager.TransactionRunner;
 public class DbServiceClientImpl implements DbServiceClient {
     private final DataTemplate<Client> dataTemplate;
     private final TransactionRunner transactionRunner;
-    HwCache<Long, Client> cache;
+    private final HwCache<String, Client> cache;
 
     public DbServiceClientImpl(
-            TransactionRunner transactionRunner, DataTemplate<Client> dataTemplate, HwCache<Long, Client> cache) {
+            TransactionRunner transactionRunner, DataTemplate<Client> dataTemplate, HwCache<String, Client> cache) {
         this.transactionRunner = transactionRunner;
         this.dataTemplate = dataTemplate;
         this.cache = cache;
         @SuppressWarnings("All")
-        var listener = new HwListener<Long, Client>() {
+        var listener = new HwListener<String, Client>() {
             @Override
-            public void notify(Long key, Client value, String action) {
+            public void notify(String key, Client value, String action) {
                 log.info("key:{}, value:{}, action: {}", key, value, action);
             }
         };
@@ -37,13 +37,13 @@ public class DbServiceClientImpl implements DbServiceClient {
                 var clientId = dataTemplate.insert(connection, client);
                 var createdClient = new Client(clientId, client.getName());
                 log.info("created client: {}", createdClient);
-                cache.put(clientId, createdClient);
+                cache.put(String.valueOf(clientId), createdClient);
                 return createdClient;
             }
             dataTemplate.update(connection, client);
             log.info("updated client: {}", client);
-            cache.remove(client.getId());
-            cache.put(client.getId(), client);
+            cache.remove(String.valueOf(client.getId()));
+            cache.put(String.valueOf(client.getId()), client);
             return client;
         });
     }
@@ -51,10 +51,12 @@ public class DbServiceClientImpl implements DbServiceClient {
     @Override
     public Optional<Client> getClient(long id) {
         return transactionRunner.doInTransaction(connection -> {
-            Client client = cache.get(id);
+            Client client = cache.get(String.valueOf(id));
             if (client == null) {
                 var clientOptional = dataTemplate.findById(connection, id);
-                log.info("client: {}", clientOptional);
+                var clientFound = clientOptional.orElseThrow(() -> new RuntimeException("Client not found"));
+                log.info("client: {}", clientFound);
+                cache.put(String.valueOf(id), clientFound);
                 return clientOptional;
             }
             return Optional.of(client);
@@ -66,6 +68,7 @@ public class DbServiceClientImpl implements DbServiceClient {
         return transactionRunner.doInTransaction(connection -> {
             var clientList = dataTemplate.findAll(connection);
             log.info("clientList:{}", clientList);
+            clientList.forEach(client -> cache.put(String.valueOf(client.getId()), client));
             return clientList;
         });
     }
