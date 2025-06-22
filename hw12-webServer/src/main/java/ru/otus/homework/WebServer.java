@@ -2,7 +2,7 @@ package ru.otus.homework;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cfg.Configuration;
 import ru.otus.homework.hibernate.core.repository.DataTemplateHibernate;
 import ru.otus.homework.hibernate.core.repository.HibernateUtils;
@@ -26,18 +26,18 @@ import ru.otus.homework.services.UserAuthServiceImpl;
     // Стартовая страница
     http://localhost:8080/login
 
-    // Страница пользователей
+    // Страница клиентов
     http://localhost:8080/clients
 
     // REST сервис
     http://localhost:8080/api/clients
 */
+@Slf4j
 public class WebServer {
     private static final int WEB_SERVER_PORT = 8080;
     private static final String TEMPLATES_DIR = "/templates/";
     public static final String HIBERNATE_CFG_FILE = "hibernate.cfg.xml";
 
-    @SneakyThrows
     public static void main(String[] args) {
         var configuration = new Configuration().configure(HIBERNATE_CFG_FILE);
 
@@ -65,7 +65,16 @@ public class WebServer {
         ClientsWebServer usersWebServer = new ClientWebServerWithSecurity(
                 WEB_SERVER_PORT, userAuthService, gson, templateProcessor, dbServiceClient);
 
-        usersWebServer.start();
-        usersWebServer.join();
+        startServer(usersWebServer);
+    }
+
+    private static void startServer(ClientsWebServer usersWebServer) {
+        try {
+            usersWebServer.start();
+            usersWebServer.join();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }

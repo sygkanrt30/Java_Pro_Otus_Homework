@@ -18,6 +18,9 @@ public class Address implements Cloneable {
 
     private String street;
 
+    public Address(String street) {
+        this.street = street;
+    }
     @Override
     public Address clone() {
         return new Address(addressId, street);

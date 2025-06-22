@@ -18,7 +18,7 @@ public class DbServiceUserImpl implements DBServiceUser {
         return transactionManager.doInReadOnlyTransaction(session -> {
             var userList = userDataTemplate.findByEntityField(session, "name", login);
             var user = userList.stream().findFirst();
-            log.info("client: {}", user);
+            log.info("user: {}", user);
             return user;
         });
     }

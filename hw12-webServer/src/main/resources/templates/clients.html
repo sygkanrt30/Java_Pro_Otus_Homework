@@ -2,94 +2,31 @@
 <html>
 <head>
     <title>Клиенты</title>
-    <meta charset="UTF-8">
-    <script>
-        async function findAll() {
-            try {
-                const response = await fetch('api/clients');
-                if (!response.ok) {
-                    throw new Error('Ошибка при получении клиентов');
-                }
-                const clients = await response.json();
-
-                const tableBody = document.querySelector('#clientsTable tbody');
-                tableBody.innerHTML = '';
-
-                clients.forEach(client => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${client.id}</td>
-                        <td>${client.name}</td>
-                        <td>${client.address}</td>
-                        <td>${client.phoneList}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                alert(error.message);
-                console.error(error);
-            }
-        }
-
-        async function create() {
-            try {
-                const name = document.getElementById('name').value;
-                const address = document.getElementById('address').value;
-                const phone = document.getElementById('phone').value;
-
-                const client = {
-                    name: name,
-                    address: address,
-                    phoneList: [phone]
-                };
-
-                const response = await fetch('api/clients', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(client)
-                });
-
-                if (response.status === 201) {
-                    alert('Клиент успешно создан');
-                    document.getElementById('name').value = '';
-                    document.getElementById('address').value = '';
-                    document.getElementById('phone').value = '';
-                    await findAll();
-                } else {
-                    throw new Error('Ошибка при создании клиента');
-                }
-            } catch (error) {
-                alert(error.message);
-                console.error(error);
-            }
-        }
-    </script>
+    <meta charset="UTF-8" />
 </head>
 <body>
 <h1>Управление клиентами</h1>
 
 <div>
     <h2>Добавить нового клиента</h2>
-    <div>
-        <label for="name">Имя:</label>
-        <input type="text" id="name" required>
-    </div>
-    <div>
-        <label for="address">Адрес:</label>
-        <input type="text" id="address">
-    </div>
-    <div>
-        <label for="phone">Телефон:</label>
-        <input type="text" id="phone">
-    </div>
-    <button onclick="create()">Создать</button>
+    <form action="api/clients" method="POST">
+        <div>
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="address">Адрес:</label>
+            <input type="text" id="address" name="address">
+        </div>
+        <div>
+            <label for="phone">Телефон:</label>
+            <input type="text" id="phone" name="phone">
+        </div>
+        <button type="submit">Создать</button>
+    </form>
 </div>
 
 <h2>Список клиентов</h2>
-<button onclick="findAll()">Получить клиентов</button>
-
 <table id="clientsTable">
     <thead>
     <tr>
@@ -99,7 +36,32 @@
         <th>Телефоны</th>
     </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+    <#if clients??>
+    <#list clients as client>
+    <tr>
+        <td>${client.id!''}</td>
+        <td>${client.name!''}</td>
+        <td>${client.address!''}</td>
+        <td>
+            <#if client.phoneList??>
+            ${client.phoneList?join(", ")}
+            <#else>
+            Нет телефонов
+        </#if>
+        </td>
+    </tr>
+    <#else>
+    <tr>
+        <td colspan="4">Нет клиентов</td>
+    </tr>
+    </#list>
+    <#else>
+    <tr>
+        <td colspan="4">Данные не загружены</td>
+    </tr>
+</#if>
+</tbody>
 </table>
 </body>
 </html>

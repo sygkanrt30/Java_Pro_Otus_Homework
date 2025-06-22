@@ -27,6 +27,10 @@ public class Phone implements Cloneable {
         this.number = number;
     }
 
+    public Phone(String number) {
+        this.number = number;
+    }
+
     @Override
     public Phone clone() {
         return new Phone(phoneId, number);

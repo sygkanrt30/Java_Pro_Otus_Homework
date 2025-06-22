@@ -4,13 +4,16 @@ import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import ru.otus.homework.hibernate.crm.model.Address;
 import ru.otus.homework.hibernate.crm.model.Client;
+import ru.otus.homework.hibernate.crm.model.Phone;
 import ru.otus.homework.hibernate.crm.service.DBServiceClient;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @Slf4j
@@ -37,21 +40,23 @@ public class ClientApiServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        String body = getBody(req);
-        var client = gson.fromJson(body, Client.class);
-        dbServiceClient.saveClient(client);
-        resp.setStatus(HttpServletResponse.SC_CREATED);
-        resp.setContentType("application/json;charset=UTF-8");
-        var json = gson.toJson(client);
-        printJsonToPage(resp, json);
-    }
-
-    private String getBody(HttpServletRequest req) {
         try {
-            return req.getReader().lines().collect(Collectors.joining());
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
+            String name = req.getParameter("name");
+            String address = req.getParameter("address");
+            String phone = req.getParameter("phone");
+
+            Client client = new Client(null,
+                    name,
+                    new Address(address),
+                    new ArrayList<>(List.of(new Phone(phone))));
+            dbServiceClient.saveClient(client);
+
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().print(gson.toJson(client));
+        } catch (Exception e) {
+            log.error("Error creating client", e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 }
