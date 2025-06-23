@@ -1,7 +1,5 @@
 package ru.otus.homework;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cfg.Configuration;
 import ru.otus.homework.hibernate.core.repository.DataTemplateHibernate;
@@ -28,9 +26,6 @@ import ru.otus.homework.services.UserAuthServiceImpl;
 
     // Страница клиентов
     http://localhost:8080/clients
-
-    // REST сервис
-    http://localhost:8080/api/clients
 */
 @Slf4j
 public class WebServer {
@@ -59,11 +54,10 @@ public class WebServer {
         var dbServiceClient = new DbServiceClientImpl(clientTemplate, transactionManager);
         var userAuthService = new UserAuthServiceImpl(dbServiceUser);
 
-        Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
         TemplateProcessor templateProcessor = new TemplateProcessorImpl(TEMPLATES_DIR);
 
         ClientsWebServer usersWebServer = new ClientWebServerWithSecurity(
-                WEB_SERVER_PORT, userAuthService, gson, templateProcessor, dbServiceClient);
+                WEB_SERVER_PORT, userAuthService,templateProcessor, dbServiceClient);
 
         startServer(usersWebServer);
     }

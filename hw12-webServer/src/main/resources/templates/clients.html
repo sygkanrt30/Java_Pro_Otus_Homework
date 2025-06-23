@@ -43,13 +43,7 @@
         <td>${client.id!''}</td>
         <td>${client.name!''}</td>
         <td>${client.address!''}</td>
-        <td>
-            <#if client.phoneList??>
-            ${client.phoneList?join(", ")}
-            <#else>
-            Нет телефонов
-        </#if>
-        </td>
+        <td>${client.phones?join(', ')}</td>
     </tr>
     <#else>
     <tr>

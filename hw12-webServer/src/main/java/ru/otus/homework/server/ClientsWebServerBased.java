@@ -1,6 +1,5 @@
 package ru.otus.homework.server;
 
-import com.google.gson.Gson;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Handler;
@@ -10,19 +9,17 @@ import ru.otus.homework.helpers.FileSystemHelper;
 import ru.otus.homework.hibernate.crm.service.DBServiceClient;
 import ru.otus.homework.services.TemplateProcessor;
 import ru.otus.homework.servlet.ClientApiServlet;
-import ru.otus.homework.servlet.ClientPageServlet;
+import ru.otus.homework.servlet.ClientServlet;
 
 public class ClientsWebServerBased implements ClientsWebServer {
     private static final String START_PAGE_NAME = "index.html";
     private static final String COMMON_RESOURCES_DIR = "static";
-    private final Gson gson;
     protected final TemplateProcessor templateProcessor;
     private final Server server;
     private final DBServiceClient dbServiceClient;
 
     public ClientsWebServerBased(
-            int port, Gson gson, TemplateProcessor templateProcessor, DBServiceClient dbServiceClient) {
-        this.gson = gson;
+            int port, TemplateProcessor templateProcessor, DBServiceClient dbServiceClient) {
         this.templateProcessor = templateProcessor;
         this.dbServiceClient = dbServiceClient;
         server = new Server(port);
@@ -74,9 +71,9 @@ public class ClientsWebServerBased implements ClientsWebServer {
     private ServletContextHandler createServletContextHandler() {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.addServlet(
-                new ServletHolder(new ClientApiServlet(gson, dbServiceClient)), "/api/clients");
+                new ServletHolder(new ClientApiServlet(dbServiceClient)), "/api/clients");
         servletContextHandler.addServlet(
-                new ServletHolder(new ClientPageServlet(templateProcessor, dbServiceClient)), "/clients");
+                new ServletHolder(new ClientServlet(templateProcessor, dbServiceClient)), "/clients");
         return servletContextHandler;
     }
 }

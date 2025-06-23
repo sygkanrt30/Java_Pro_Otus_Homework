@@ -1,7 +1,5 @@
 package ru.otus.homework.server;
 
-import com.google.gson.Gson;
-import java.util.Arrays;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -12,16 +10,17 @@ import ru.otus.homework.services.UserAuthService;
 import ru.otus.homework.servlet.AuthorizationFilter;
 import ru.otus.homework.servlet.LoginServlet;
 
+import java.util.Arrays;
+
 public class ClientWebServerWithSecurity extends ClientsWebServerBased {
     private final UserAuthService userAuthService;
 
     public ClientWebServerWithSecurity(
             int port,
             UserAuthService userAuthService,
-            Gson gson,
             TemplateProcessor templateProcessor,
             DBServiceClient dbServiceClient) {
-        super(port, gson, templateProcessor, dbServiceClient);
+        super(port, templateProcessor, dbServiceClient);
         this.userAuthService = userAuthService;
     }
 
