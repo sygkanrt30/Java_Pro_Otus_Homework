@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Клиенты</title>
+    <meta charset="UTF-8" />
+</head>
+<body>
+<h1>Управление клиентами</h1>
+
+<div>
+    <h2>Добавить нового клиента</h2>
+    <form action="api/clients" method="POST">
+        <div>
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="address">Адрес:</label>
+            <input type="text" id="address" name="address">
+        </div>
+        <div>
+            <label for="phone">Телефон:</label>
+            <input type="text" id="phone" name="phone">
+        </div>
+        <button type="submit">Создать</button>
+    </form>
+</div>
+
+<h2>Список клиентов</h2>
+<table id="clientsTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Адрес</th>
+        <th>Телефоны</th>
+    </tr>
+    </thead>
+    <tbody>
+    <#if clients??>
+    <#list clients as client>
+    <tr>
+        <td>${client.id!''}</td>
+        <td>${client.name!''}</td>
+        <td>${client.address!''}</td>
+        <td>${client.phones?join(', ')}</td>
+    </tr>
+    <#else>
+    <tr>
+        <td colspan="4">Нет клиентов</td>
+    </tr>
+    </#list>
+    <#else>
+    <tr>
+        <td colspan="4">Данные не загружены</td>
+    </tr>
+</#if>
+</tbody>
+</table>
+</body>
+</html>
