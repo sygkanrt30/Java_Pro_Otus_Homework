@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Клиенты</title>
+    <meta charset="UTF-8"/>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        form { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: inline-block; width: 100px; }
+        input { padding: 8px; width: 300px; }
+        button { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+<h1>Управление клиентами</h1>
+
+<div>
+    <h2>Добавить нового клиента</h2>
+    <form id="clientForm">
+        <div class="form-group">
+            <label for="name">Имя:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="street">Улица:</label>
+            <input type="text" id="street" name="street" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Телефон:</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+        <button type="submit">Создать</button>
+    </form>
+</div>
+
+<h2>Список клиентов</h2>
+<table id="clientsTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Имя</th>
+        <th>Адрес</th>
+        <th>Телефоны</th>
+    </tr>
+    </thead>
+    <tbody id="clientsTableBody">
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', loadClients);
+
+    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const clientDto = {
+            name: document.getElementById('name').value,
+            street: document.getElementById('street').value,
+            phone: document.getElementById('phone').value
+        };
+
+        try {
+            const response = await fetch('/api/clients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(clientDto)
+            });
+
+            if (response.ok) {
+                loadClients();
+                this.reset();
+            } else {
+                const error = await response.json();
+                console.error('Ошибка при сохранении:', error);
+                alert(`Ошибка: ${JSON.stringify(error)}`);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке данных');
+        }
+    });
+
+    async function loadClients() {
+        try {
+            const response = await fetch('/api/clients');
+            const clients = await response.json();
+            const tableBody = document.getElementById('clientsTableBody');
+            tableBody.innerHTML = '';
+
+            if (clients && clients.length > 0) {
+                clients.forEach(client => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${client.id || ''}</td>
+                        <td>${client.name || ''}</td>
+                        <td>${client.address?.street || ''}</td>
+                        <td>${client.phones?.[0]?.number || ''}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4">Нет клиентов</td>';
+                tableBody.appendChild(row);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки:', error);
+            document.getElementById('clientsTableBody').innerHTML =
+                '<tr><td colspan="4">Ошибка загрузки данных</td></tr>';
+        }
+    }
+</script>
+</body>
+</html>
