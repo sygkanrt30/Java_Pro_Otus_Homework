@@ -59,6 +59,7 @@ public class NumberClient {
             TimeUnit.SECONDS.sleep(1);
             int lastNumber = lastServerNumber.get();
             currentValue += (lastNumber + 1);
+            lastServerNumber.set(0);
             log.info("Current value: {}", currentValue);
         }
         finishLatch.await();
